@@ -1,0 +1,23 @@
+<?php
+
+/**
+ */
+class Phergie_Plugin_Head extends Phergie_Plugin_Abstract_Command
+{
+    /**
+     * @return void
+     */
+    public function onDoHead($url, $header)
+    {
+		$headers = get_headers($url);
+		$heads = array();
+		foreach($headers as $head){
+			preg_match('@^([a-z-_]+)\s*:\s*(.+)$@i', $head, $h);
+			$heads[strtolower($h[1])] = $h[2];
+		}
+		$this->doPrivmsg(
+			$this->event->getSource(),
+			sprintf('%s: %s ', $header, $heads[strtolower($header)])
+		);
+    }
+}

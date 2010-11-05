@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * Performs and responds with messages containing the results of conversions
+ * between different units.
+ */
+class Phergie_Plugin_Convert extends Phergie_Plugin_Abstract_Command
+{
+    /**
+     * Returns whether or not the plugin's dependencies are met.
+     *
+     * @param Phergie_Driver_Abstract $client Client instance
+     * @param array $plugins List of short names for plugins that the
+     *                       bootstrap file intends to instantiate
+     * @see Phergie_Plugin_Abstract_Base::checkDependencies()
+     * @return bool TRUE if dependencies are met, FALSE otherwise
+     */
+    public static function checkDependencies(Phergie_Driver_Abstract $client, array $plugins)
+    {
+        if (!extension_loaded('Dom')) {
+            return 'Dom php extension is required';
+        }
+
+        return true;
+    }
+
+    /**
+     * Performs a unit conversion and returns the result in a message.
+     *
+     * @param string $convert Conversion to perform
+     * @return void
+     */
+    public function onDoConvert($convert)
+    {
+        $target = $this->event->getNick();
+
+        $context = stream_context_create(array(
+            'http' => array(
+                'timeout' => 5,
+                'user_agent' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9b3) Gecko/2008020514 Firefox/3.0b3'
+            )
+        ));
+
+        $url = 'http://www.google.com/search?q=' . urlencode($convert) . '&btnG=Google+Search&aq=f&ie=ascii&oe=ascii';
+
+        $contents = @file_get_contents($url, null, $context);
+        if (empty($contents)) {
+            $this->debug('Empty response');
+            return;
+        }
+
+        $doc = new DomDocument();
+        @$doc->loadHTML($contents);
+        foreach ($doc->getElementsByTagName('h2') as $element) {
+            if ($element->getAttribute('class') == 'r') {
+                $children = $element->childNodes;
+                $text = str_replace(array(chr(195), chr(151), chr(160)), array('x', '', ' '), $children->item(0)->nodeValue);
+                if ($children->length >= 3) {
+                    $text .= '^' . $children->item(1)->nodeValue . $children->item(2)->nodeValue;
+                }
+            }
+        }
+        if (isset($text)) {
+            $this->doPrivmsg($this->event->getSource(), $target . ': ' . $text);
+        } else {
+            $this->doNotice($target, 'Computation error, nothing was returned');
+        }
+    }
+    public function onDoCalc($convert)
+    {
+		return $this->OnDoConvert($convert);
+	}
+}

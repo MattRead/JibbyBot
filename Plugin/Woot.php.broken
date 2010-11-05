@@ -1,0 +1,22 @@
+<?php
+
+/**
+ */
+class Phergie_Plugin_Woot extends Phergie_Plugin_Abstract_Command
+{
+    /**
+     * @return void
+     */
+    public function onDoWoot()
+    {
+    	$html = file_get_contents('http://www.woot.com/');
+		preg_match('@<h3 id="TitleHeader">([^<]+)</h3>@', $html, $item);
+		preg_match('@<span id="PriceSpan">([^<]+)</span>@', $html, $price);
+		preg_match('@<span class="shipping">([^<]+)</span>@', $html, $shipping);
+		$this->doPrivmsg(
+			$this->event->getSource(),
+			sprintf('Current Woot: %s, %s %s -- http://www.woot.com/', $item[1], $price[1], $shipping[1])
+		);
+		unset($item, $price, $shipping, $html);
+    }
+}
