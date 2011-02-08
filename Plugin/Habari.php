@@ -68,7 +68,7 @@ class Phergie_Plugin_Habari extends Phergie_Plugin_Abstract_Command
     protected function wikiSearch($search) {
         $source = $this->event->getSource();
         $nick = $this->event->getNick();
-	$dat = file_get_contents('http://wiki.habariproject.org/en/Special:Search?fulltext=Search&go=Go&search=' . urlencode($search));
+		$dat = file_get_contents('http://wiki.habariproject.org/w/index.php?title=Special:Search&fulltext=Search&search=' . urlencode($search));
         preg_match('/<li><a href="(.*?)"/', $dat, $m);
         $link = $m[1];
         $msg =  "{$nick} wiki search for '{$search}': http://wiki.habariproject.org{$link}";
