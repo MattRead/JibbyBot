@@ -1,0 +1,3 @@
+[submodule "phergie"]
+	path = phergie
+	url = git@github.com:chrismeller/phergie.git
