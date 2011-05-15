@@ -51,6 +51,27 @@
 			
 		}
 		
+		public function onCommandTranslation ( $language ) {
+			
+			$chan = $this->getEvent()->getSource();
+			$nick = $this->getEvent()->getNick();
+			
+			$data = file_get_contents( 'https://translations.launchpad.net/habari/trunk/+pots/habari' . urlencode( $language ) . '/+index' );
+			
+			preg_match( '#To do:</b>.*?(\d+)#s', $data, $m );
+			
+			if ( !isset( $m[1] ) ) {
+				$msg = "$nick, Could not find language '$language'";
+			}
+			else {
+				$todo = $m[1];
+				$msg = "$nick, $language still needs $todo strings translated. Go help https://translations.launchpad.net/habari/trunk/+pots/habari/$language/+translate";
+			}
+			
+			$this->doPrivmsg( $chan, $msg );
+			
+		}
+		
 	}
 
 ?>
